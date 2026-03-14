@@ -1,0 +1,12 @@
+El sistema debe permitir agendar citas
+El sistema debe permitir ingresar y retirar Clientes
+
+### Formato de Datos de Clientes
+El sistema debe manejar la siguiente estructura para los datos de los clientes (basada en el Excel provisto):
+- Nombre
+- Fecha cumpleaños
+- Numero celular
+- Proceso
+- Número sesion
+- Producto vendido
+- Valor proceso
