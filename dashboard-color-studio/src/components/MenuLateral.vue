@@ -1,10 +1,10 @@
 <script setup>
 const secciones = [
-    { titulo: "Dashboard", descripcion: "Presiona para ver una vista general del negocio.", img: new URL("../assets/images/home_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href },
-    { titulo: "Clientes", descripcion: "Presiona para ver y gestionar a tus clientes.", img: new URL("../assets/images/group_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href },
-    { titulo: "Inventario", descripcion: "Presiona para ver y gestionar tu inventario.", img: new URL("../assets/images/inventory_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href },
-    { titulo: "Configuracion", descripcion: "Presiona para ver la configuracion de la aplicacion.", img: new URL("../assets/images/settings_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href },
-    { titulo: "Ayuda", descripcion: "Presiona para ver el panel de ayuda del usuario.", img: new URL("../assets/images/help_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href }
+    { titulo: "Dashboard", descripcion: "Presiona para ver una vista general del negocio.", img: new URL("../assets/images/home_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href, ruta: "/" },
+    { titulo: "Clientes", descripcion: "Presiona para ver y gestionar a tus clientes.", img: new URL("../assets/images/group_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href, ruta: "/clientes" },
+    { titulo: "Inventario", descripcion: "Presiona para ver y gestionar tu inventario.", img: new URL("../assets/images/inventory_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href, ruta: "/inventario" },
+    { titulo: "Configuracion", descripcion: "Presiona para ver la configuracion de la aplicacion.", img: new URL("../assets/images/settings_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href, ruta: "/configuracion" },
+    { titulo: "Ayuda", descripcion: "Presiona para ver el panel de ayuda del usuario.", img: new URL("../assets/images/help_30dp_000000_FILL0_wght400_GRAD0_opsz24.png", import.meta.url).href, ruta: "/ayuda" }
 ]
 
 </script>
@@ -15,9 +15,11 @@ const secciones = [
             <div class="logo"></div>
         </header>
         <div class="secciones">
-            <li v-for="seccion in secciones" class="seccion">
-                <img :src="seccion.img" alt="Icon"> {{ seccion.titulo }}
-            </li>
+            <router-link v-for="seccion in secciones" :to="seccion.ruta">
+                <li class="seccion">
+                    <img :src="seccion.img" alt="Icon" class="seccion-icon"> {{ seccion.titulo }}
+                </li>
+            </router-link>
         </div>
         <slot>
 
@@ -42,7 +44,7 @@ header {
     align-items: center;
     width: 100%;
     height: 15%;
-    border: 2px solid red;
+    padding: 15px 0 20px 0;
     border-radius: 35px 0 0 0;
 }
 
@@ -59,21 +61,30 @@ header {
     gap: 1rem;
     margin: 0.5rem;
     padding: 0.3rem;
-    border: 2px solid red;
 }
 
 .seccion {
     display: flex;
     align-items: center;
     transition: ease-in-out 125ms;
+    padding-left: 10px;
+    border-radius: 10px;
     gap: 5px;
     color: black;
     font-size: 22px;
-    border: 2px solid red;
 }
 
 .seccion:hover {
     background-color: rgb(196, 217, 235);
     cursor: pointer;
 }
+
+.seccion-icon{
+    width: 20px;
+    height: 20px;
+}
+
+.router-link-active .seccion{
+    background-color: rgb(196, 217, 235);
+    }
 </style>

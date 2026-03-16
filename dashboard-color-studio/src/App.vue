@@ -28,11 +28,12 @@ import MenuLateral from './components/MenuLateral.vue';
   font-family: 'Inter', sans-serif;
 }
 
-.main {
+.main-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  padding: 0;
   color: black;
-  height: 100vh;
+  height: 100%;
+  width: 100%;
 }
 </style>

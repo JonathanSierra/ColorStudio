@@ -25,30 +25,19 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="main">
         <h1>Clientes</h1>
-        <p>Pronto aquí cargaremos a Ana, Carolina y María desde la base de datos.</p>
 
         <tabla-contenido :datos="misClientes" :columnas="misColumnas"></tabla-contenido>
 
-        <router-link to="/">Home</router-link>
-    </div>
 </template>
 
 <style scoped>
-.main h1 {
+h1 {
     margin: 20px 0 10px 0;
+    font-size: 30px;
 }
 
-.main p {
+p {
     margin: 20px 0 5rem 0;
-}
-
-.main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: black;
-    height: 100vh;
 }
 </style>

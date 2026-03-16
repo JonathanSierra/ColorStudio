@@ -7,6 +7,9 @@
 </template>
 <style scoped>
 .background {
+    background-image: url(../assets/images/interior-design-renderings-3d-rendering-of-luxurious-for-a-beauty-salon_9850621.webp);
+    background-repeat: no-repeat;
+    background-size: cover;
     display: flex;
     flex-direction: column;
     align-items: center;

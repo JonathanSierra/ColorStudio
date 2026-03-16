@@ -18,7 +18,6 @@
 </template>
 <style scoped>
 .panel-wrap {
-    border: 2px solid red;
     background-color: rgba(255, 255, 255, 0.418);
     border-radius: 35px;
     padding: 1rem;
@@ -29,14 +28,12 @@
 
 .panel {
     display: flex;
-    border: solid 2px red;
     flex-direction: column;
-    align-items: baseline;
     z-index: 0;
     width: 95%;
     height: 100%;
     border-radius: 0 35px 35px 0;
-    background-color: rgb(221, 232, 241);
+    background-color: rgb(228, 238, 246);
 }
 
 .panel-header {
@@ -53,15 +50,13 @@
 .user-box {
     display: flex;
     align-items: center;
-    border: 2px solid red;
     gap: 0.5rem;
     padding: 0 1rem 0 0;
 }
 
 .icon-img {
-    border: 2px solid red;
-    width: 1.7rem;
-    height: 1.7rem;
+    width: 1.6rem;
+    height: 1.6rem;
 }
 
 .user-img {
@@ -74,6 +69,5 @@
 h2 {
     margin: 5px 20px;
     font-size: 20px;
-    border: 2px solid red;
 }
 </style>

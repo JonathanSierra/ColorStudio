@@ -1,3 +1,15 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.profiles.windows": {
+        "Terminal IDE (Reparada)": {
+            "source": "PowerShell",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "$sysPath = [Environment]::GetEnvironmentVariable('PATH', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'User'); $env:PATH = $env:PATH + ';' + $sysPath"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "Terminal IDE (Reparada)"
 }
