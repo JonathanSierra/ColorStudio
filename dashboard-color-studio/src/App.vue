@@ -36,4 +36,9 @@ import MenuLateral from './components/MenuLateral.vue';
   height: 100%;
   width: 100%;
 }
+
+h1 {
+    padding: 0.5rem 0 0 10px;
+    font-size: 30px;
+}
 </style>

@@ -1,15 +1,41 @@
 {
-    "git.ignoreLimitWarning": true,
-    "python.terminal.activateEnvironment": true,
-    "terminal.integrated.profiles.windows": {
-        "Terminal IDE (Reparada)": {
-            "source": "PowerShell",
-            "args": [
-                "-NoExit",
-                "-Command",
-                "$sysPath = [Environment]::GetEnvironmentVariable('PATH', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'User'); $env:PATH = $env:PATH + ';' + $sysPath"
-            ]
-        }
-    },
-    "terminal.integrated.defaultProfile.windows": "Terminal IDE (Reparada)"
+  "git.ignoreLimitWarning": true,
+  "python.terminal.activateEnvironment": true,
+  "terminal.integrated.profiles.windows": {
+    "Terminal IDE (Reparada)": {
+      "source": "PowerShell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "$sysPath = [Environment]::GetEnvironmentVariable('PATH', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'User'); $env:PATH = $env:PATH + ';' + $sysPath"
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Terminal IDE (Reparada)",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8"
+  },
+  "autopep8.args": [
+    "--max-line-length=200",
+    "--aggressive",
+    "--aggressive",
+    "--ignore=E302"
+  ],
+
+
+
+
+
+  "prettier.configPath": ".prettierrc"
 }
