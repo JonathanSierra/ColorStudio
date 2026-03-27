@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 import TablaContenido from '../components/TablaContenido.vue';
 import Card from '../components/Card.vue';
@@ -7,6 +7,7 @@ import ModalNuevoCliente from '../components/ModalNuevoCliente.vue';
 import ModalEditarCliente from '../components/ModalEditarCliente.vue';
 import ModalMasAcciones from '../components/ModalMasAcciones.vue';
 import ModalFiltros from '../components/ModalFiltros.vue';
+import BaseToast from '../components/BaseToast.vue';
 
 const misClientes = ref([]);
 const clienteAEditar = ref(null);
@@ -17,6 +18,11 @@ const mostrarModalNuevoCliente = ref(false);
 const mostrarModalEditarCliente = ref(false);
 const mostrarModalFiltros = ref(false);
 const mostrarClientesInactivos = ref(false);
+const mensajeToast = ref('');
+const tipoNotificacion = ref('exito');
+const terminoBusqueda = ref('');
+const fechaInicio = ref('');
+const fechaFinal = ref('');
 
 const misColumnas = [
     { titulo: 'Id', campo: 'id' },
@@ -54,11 +60,18 @@ const totalPaginas = computed(() => {
 });
 
 const clientesFiltrados = computed(() => {
-    if (mostrarClientesInactivos.value) {
-        return misClientes.value.filter(cliente => cliente.activo === 0);
-    } else {
-        return misClientes.value.filter(cliente => cliente.activo === 1);
+    let filtrados = misClientes.value.filter(cliente => (mostrarClientesInactivos.value ? cliente.activo === 0 : cliente.activo === 1));
+
+    if (terminoBusqueda.value) {
+        const busqueda = terminoBusqueda.value.toLowerCase().trim();
+        filtrados = filtrados.filter(cliente => cliente.nombre.toLowerCase().includes(busqueda) || cliente.numero_celular.includes(busqueda) || cliente.fecha_cumpleaños.includes(busqueda));
     }
+
+    return filtrados;
+});
+
+const filtrarPorRegistro = computed(() => {
+    return clientesFiltrados.value.slice(fechaDesde, fechaHasta);
 });
 
 const textoPaginacion = computed(() => {
@@ -66,6 +79,22 @@ const textoPaginacion = computed(() => {
     const calculo = paginaActual.value * itemsPorPagina.value;
     const fin = Math.min(calculo, totalClientes.value);
     return `Mostrando ${inicio} - ${fin} de ${totalClientes.value} clientes`;
+});
+
+const paginasVisibles = computed(() => {
+    let inicio = Math.max(1, paginaActual.value - 2);
+    let final = Math.min(totalPaginas.value, inicio + 4);
+
+    if (final === totalPaginas.value) {
+        inicio = Math.max(1, final - 4);
+    }
+
+    const rango = [];
+    for (let i = inicio; i <= final; i++) {
+        rango.push(i);
+    }
+
+    return rango;
 });
 
 const alternarMenuAcciones = id => {
@@ -81,6 +110,56 @@ const formatearFecha = fecha => {
 const cerrarTodo = () => {
     mostrarModalFiltros.value = false;
     filaAbierta.value = null;
+};
+
+const mostrarNotificacion = (texto, tipo = 'exito') => {
+    mensajeToast.value = texto;
+    tipoNotificacion.value = tipo;
+    setTimeout(() => {
+        mensajeToast.value = '';
+    }, 3000);
+};
+
+const abrirModalEditarCliente = cliente => {
+    clienteAEditar.value = cliente;
+    mostrarModalEditarCliente.value = true;
+};
+
+const alternarModalFiltros = () => {
+    if (mostrarModalFiltros.value) {
+        mostrarModalFiltros.value = false;
+    } else {
+        mostrarModalFiltros.value = true;
+    }
+};
+
+const guardarNuevoCliente = async datosNuevoCliente => {
+    await axios.post('http://127.0.0.1:8000/añadirCliente', datosNuevoCliente);
+    mostrarModalNuevoCliente.value = false;
+    mostrarNotificacion('Cliente Creado con exito!');
+    cargarClientes();
+};
+const guardarClienteActualizado = async datosClienteActualizado => {
+    const id = clienteAEditar.value.id;
+    await axios.put(`http://127.0.0.1:8000/editarCliente/${id}`, datosClienteActualizado);
+    mostrarModalEditarCliente.value = false;
+    mostrarNotificacion('Cliente Actualizado con exito!');
+    cargarClientes();
+};
+
+const activarCliente = async cliente => {
+    const id = cliente.id;
+    await axios.patch(`http://127.0.0.1:8000/activarCliente/${id}`);
+    filaAbierta.value = null;
+    mostrarNotificacion('Cliente Reactivado con exito!');
+    cargarClientes();
+};
+const desactivarCliente = async cliente => {
+    const id = cliente.id;
+    await axios.patch(`http://127.0.0.1:8000/desactivarCliente/${id}`);
+    filaAbierta.value = null;
+    mostrarNotificacion('Cliente Eliminado con exito');
+    cargarClientes();
 };
 
 // Botones para moverse entre paginas
@@ -105,63 +184,22 @@ const ultimaPagina = () => {
 };
 // -----------------------------------------------------
 
-const paginasVisibles = computed(() => {
-    let inicio = Math.max(1, paginaActual.value - 2);
-    let final = Math.min(totalPaginas.value, inicio + 4);
-
-    if (final === totalPaginas.value) {
-        inicio = Math.max(1, final - 4);
-    }
-
-    const rango = [];
-    for (let i = inicio; i <= final; i++) {
-        rango.push(i);
-    }
-
-    return rango;
+watch(mostrarClientesInactivos, () => {
+    paginaActual.value = 1;
 });
 
-const abrirModalEditarCliente = cliente => {
-    clienteAEditar.value = cliente;
-    mostrarModalEditarCliente.value = true;
-};
-
-const alternarModalFiltros = () => {
-    if (mostrarModalFiltros.value) {
-        mostrarModalFiltros.value = false;
-    } else {
-        mostrarModalFiltros.value = true;
-    }
-};
-
-const guardarNuevoCliente = async datosNuevoCliente => {
-    await axios.post('http://127.0.0.1:8000/añadirCliente', datosNuevoCliente);
-    mostrarModalNuevoCliente.value = false;
-    cargarClientes();
-};
-const guardarClienteActualizado = async datosClienteActualizado => {
-    const id = clienteAEditar.value.id;
-    await axios.put(`http://127.0.0.1:8000/editarCliente/${id}`, datosClienteActualizado);
-    mostrarModalEditarCliente.value = false;
-    cargarClientes();
-};
-
-const activarCliente = async cliente => {
-    const id = cliente.id;
-    await axios.patch(`http://127.0.0.1:8000/activarCliente/${id}`);
-    filaAbierta.value = null;
-    cargarClientes();
-};
-const desactivarCliente = async cliente => {
-    const id = cliente.id;
-    await axios.patch(`http://127.0.0.1:8000/desactivarCliente/${id}`);
-    filaAbierta.value = null;
-    cargarClientes();
-};
+watch(terminoBusqueda, () => (paginaActual.value = 1));
 </script>
 
 <template>
     <Teleport to="body">
+        <Transition name="toast">
+            <BaseToast v-if="mensajeToast" :tipo="tipoNotificacion">
+                <template #toastContent>
+                    {{ mensajeToast }}
+                </template>
+            </BaseToast>
+        </Transition>
         <ModalEditarCliente v-if="mostrarModalEditarCliente" :cliente="clienteAEditar" @cerrar="mostrarModalEditarCliente = false" @actualizar="guardarClienteActualizado"></ModalEditarCliente>
         <ModalNuevoCliente v-if="mostrarModalNuevoCliente" @cerrar="mostrarModalNuevoCliente = false" @crear="guardarNuevoCliente"></ModalNuevoCliente>
     </Teleport>
@@ -170,7 +208,7 @@ const desactivarCliente = async cliente => {
         <template v-slot:header-content>
             <h2>Clientes vista previa</h2>
             <div class="card-header-box">
-                <input class="buscar-cliente" type="text" name="buscar-cliente" id="" placeholder="Buscar cliente" />
+                <input v-model="terminoBusqueda" class="buscar-cliente" type="text" name="buscar-cliente" id="" placeholder="Buscar cliente" />
                 <div class="buttons-box">
                     <button v-on:click="mostrarModalNuevoCliente = true" class="añadir-cliente">
                         <span>Añadir Cliente</span>
@@ -178,7 +216,7 @@ const desactivarCliente = async cliente => {
                     <button v-on:click="alternarModalFiltros" class="filtro-cliente">
                         <span>Filtrar</span>
                     </button>
-                    <ModalFiltros v-if="mostrarModalFiltros" @activos="mostrarClientesInactivos = false" @inactivos="mostrarClientesInactivos = true" @por-fecha=""></ModalFiltros>
+                    <ModalFiltros v-if="mostrarModalFiltros" @activos="mostrarClientesInactivos = false" @inactivos="mostrarClientesInactivos = true" @filtro-fecha-registro="" :mostrarClientesInactivos="mostrarClientesInactivos"></ModalFiltros>
                 </div>
             </div>
         </template>

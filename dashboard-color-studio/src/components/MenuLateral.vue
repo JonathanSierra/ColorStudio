@@ -1,6 +1,6 @@
 <script setup>
 const secciones = [
-    { titulo: 'Dashboard', descripcion: 'Presiona para ver una vista general del negocio.', img: new URL('../assets/images/home_30dp_000000_FILL0_wght400_GRAD0_opsz24.png', import.meta.url).href, ruta: '/' },
+    { titulo: 'General', descripcion: 'Presiona para ver una vista general del negocio.', img: new URL('../assets/images/home_30dp_000000_FILL0_wght400_GRAD0_opsz24.png', import.meta.url).href, ruta: '/' },
     { titulo: 'Clientes', descripcion: 'Presiona para ver y gestionar a tus clientes.', img: new URL('../assets/images/group_30dp_000000_FILL0_wght400_GRAD0_opsz24.png', import.meta.url).href, ruta: '/clientes' },
     { titulo: 'Inventario', descripcion: 'Presiona para ver y gestionar tu inventario.', img: new URL('../assets/images/inventory_30dp_000000_FILL0_wght400_GRAD0_opsz24.png', import.meta.url).href, ruta: '/inventario' },
     { titulo: 'Configuracion', descripcion: 'Presiona para ver la configuracion de la aplicacion.', img: new URL('../assets/images/settings_30dp_000000_FILL0_wght400_GRAD0_opsz24.png', import.meta.url).href, ruta: '/configuracion' },

@@ -1,4 +1,6 @@
 <script setup>
+import BaseModal from './BaseModal.vue';
+
 import { ref, watch } from 'vue';
 
 const nombreCliente = ref();
@@ -42,75 +44,32 @@ watch(
 </script>
 
 <template>
-    <div class="backdrop">
-        <div class="modal-window">
-            <header>
-                <h2>Editar cliente</h2>
-            </header>
-            <main>
-                <div class="campo">
-                    <h3>Nombre:</h3>
-                    <input v-model="nombreCliente" type="text" name="nombre" id="" />
-                </div>
-                <div class="campo">
-                    <h3>Numero de celular:</h3>
-                    <input v-model="numeroCelular" type="text" name="numero-celular" id="" />
-                </div>
-                <div class="campo">
-                    <h3>Fecha de nacimiento:</h3>
-                    <input v-model="fechaNacimiento" type="date" name="fecha-nacimiento" id="" />
-                </div>
-            </main>
-            <footer>
-                <button @click="$emit('cerrar')" class="btn-cancelar">Cancelar</button>
-                <button v-on:click="enviarInformacion" class="btn-actualizar">Actualizar</button>
-            </footer>
-        </div>
-    </div>
+    <BaseModal @cerrar="$emit('cerrar')">
+        <template #BaseModalHeader>
+            <h2>Editar cliente</h2>
+        </template>
+        <template #BaseModalMain>
+            <div class="campo">
+                <h3>Nombre:</h3>
+                <input v-model="nombreCliente" type="text" name="nombre" id="" />
+            </div>
+            <div class="campo">
+                <h3>Numero de celular:</h3>
+                <input v-model="numeroCelular" type="text" name="numero-celular" id="" />
+            </div>
+            <div class="campo">
+                <h3>Fecha de nacimiento:</h3>
+                <input v-model="fechaNacimiento" type="date" name="fecha-nacimiento" id="" />
+            </div>
+        </template>
+        <template #BaseModalFooter>
+            <button @click="$emit('cerrar')" class="btn-cancelar">Cancelar</button>
+            <button v-on:click="enviarInformacion" class="btn-actualizar">Actualizar</button>
+        </template>
+    </BaseModal>
 </template>
 
 <style scoped>
-.backdrop {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    background-color: rgba(0, 0, 0, 0.412);
-    width: 100dvw;
-    height: 100dvh;
-}
-
-.modal-window {
-    display: flex;
-    overflow: hidden;
-    flex-direction: column;
-    border-radius: 20px;
-    width: 50%;
-    height: 60%;
-    background-color: rgb(228, 238, 246);
-}
-
-.modal-window header {
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    background-color: white;
-    color: black;
-}
-
-.modal-window main {
-    display: flex;
-    padding: 1rem;
-    justify-content: space-between;
-    gap: 3rem;
-    flex-wrap: wrap;
-    flex: 1;
-}
-
 .campo {
     max-height: 4rem;
     max-width: 50%;
@@ -129,15 +88,6 @@ watch(
     color: black;
     border-radius: 5px;
     height: 1.8rem;
-}
-
-.modal-window footer {
-    display: flex;
-    justify-content: end;
-    gap: 1rem;
-    background-color: white;
-    color: black;
-    padding: 1rem;
 }
 
 .btn-cancelar {
