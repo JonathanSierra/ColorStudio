@@ -4,12 +4,8 @@
         <div class="panel">
             <div class="panel-header">
                 <div class="user-box">
-
                     <h2>Bienvenida Carolina Ramirez</h2>
-                    <img class="icon-img"
-                        src="../assets/images/notifications_24dp_000000_FILL0_wght400_GRAD0_opsz24.png"
-                        alt="Notificaciones">
-                    <img class="user-img" src="../assets/images/person_30dp_000000_FILL0_wght400_GRAD0_opsz24.png"></img>
+                    <img class="user-img" src="../assets/images/Carolina_Ramirez.png"></img>
                 </div>
             </div>
             <slot></slot>
@@ -51,7 +47,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0 1rem 0 0;
+    padding: 0 2rem 0 0;
 }
 
 .icon-img {
@@ -61,7 +57,6 @@
 
 .user-img {
     border-radius: 100%;
-    border: 2px solid black;
     width: 2rem;
     height: 2rem;
 }

@@ -1,5 +1,24 @@
 <script setup>
 const emits = defineEmits(['cerrar']);
+
+const props = defineProps({
+    overflow: {
+        type: String,
+        default: 'hidden'
+    },
+    alto: {
+        type: String,
+        default: '60%'
+    },
+    ancho: {
+        type: String,
+        default: '50%'
+    },
+    gap: {
+        type: String,
+        default: '3rem'
+    }
+});
 </script>
 
 <template>
@@ -36,17 +55,18 @@ const emits = defineEmits(['cerrar']);
 
 .modal-window {
     display: flex;
-    overflow: hidden;
+    overflow: v-bind(overflow);
     flex-direction: column;
     border-radius: 20px;
-    width: 50%;
-    height: 60%;
+    width: v-bind(ancho);
+    height: v-bind(alto);
     background-color: rgb(228, 238, 246);
 }
 
 .modal-window header {
     overflow: hidden;
     display: flex;
+    border-radius: 20px 20px 0 0;
     align-items: center;
     padding: 1rem;
     background-color: white;
@@ -57,7 +77,7 @@ const emits = defineEmits(['cerrar']);
     display: flex;
     padding: 1rem;
     justify-content: space-between;
-    gap: 3rem;
+    gap: v-bind(gap);
     flex-wrap: wrap;
     flex: 1;
 }
@@ -66,6 +86,7 @@ const emits = defineEmits(['cerrar']);
     display: flex;
     justify-content: end;
     gap: 1rem;
+    border-radius: 0 0 20px 20px;
     background-color: white;
     color: black;
     padding: 1rem;

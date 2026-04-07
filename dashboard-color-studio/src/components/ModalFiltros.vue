@@ -1,10 +1,22 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import BasePopOver from './BasePopOver.vue';
 
-const emits = defineEmits(['inactivos', 'activos', 'filtroFechaRegistro']);
+const emits = defineEmits(['cambiar-estado', 'filtroFechaRegistro', 'limpiar-filtros']);
 
-const props = defineProps(['mostrarClientesInactivos']);
+const props = defineProps(['filtroEstado', 'mostrarClientesInactivos', 'fechaInicio', 'fechaFinal']);
+
+onMounted(() => {
+    fechaDesde.value = props.fechaInicio;
+    fechaHasta.value = props.fechaFinal;
+});
+
+const limpiarTodo = () => {
+    fechaDesde.value = '';
+    fechaHasta.value = '';
+    emits('limpiar-filtros');
+    emits('cambiar-estado', 'sinFiltros');
+};
 
 const mostrarRango = ref(false);
 const fechaDesde = ref('');
@@ -12,12 +24,13 @@ const fechaHasta = ref('');
 </script>
 
 <template>
-    <BasePopOver ancho="100px">
+    <BasePopOver left="98.2%" ancho="100px">
         <template #PopOverContent>
-            <li v-on:click="$emit('activos')" :class="{ 'filtro-activo': !mostrarClientesInactivos }">Activos</li>
-            <li v-on:click="$emit('inactivos')" :class="{ 'filtro-activo': mostrarClientesInactivos }">Inactivos</li>
-            <li class="filtro-fecha-ingreso" v-on:click="mostrarRango = true">Fecha de ingreso</li>
-            <BasePopOver v-if="mostrarRango" class="modal-rango-fecha-ingreso" ancho="300px">
+            <li v-on:click="limpiarTodo" :class="{ 'filtro-activo': !props.fechaInicio && !props.fechaFinal && props.filtroEstado === 'sinFiltros' }">No filtrar</li>
+            <li v-on:click="$emit('cambiar-estado', 'activos')" :class="{ 'filtro-activo': props.filtroEstado === 'activos' }">Activos</li>
+            <li v-on:click="$emit('cambiar-estado', 'inactivos')" :class="{ 'filtro-activo': props.filtroEstado === 'inactivos' }">Inactivos</li>
+            <li v-on:click="mostrarRango = !mostrarRango" class="filtro-fecha-ingreso" :class="{ 'filtro-activo': mostrarRango || props.fechaInicio || props.fechaFinal }">Fecha de ingreso</li>
+            <BasePopOver v-if="mostrarRango" class="modal-rango-fecha-ingreso" right="0" top="100%" ancho="300px">
                 <template class="template" #PopOverContent>
                     <div class="desde-hasta">
                         <div class="desde">
@@ -40,7 +53,7 @@ const fechaHasta = ref('');
     border: 2px solid rgb(5, 148, 244);
     position: absolute;
     top: -0.5%;
-    right: -47.5%;
+    right: -46%;
 }
 
 li img {
@@ -60,8 +73,6 @@ li img {
 
 .modal-rango-fecha-ingreso {
     position: absolute;
-    top: 77px;
-    right: -2px;
 }
 
 .desde-hasta {

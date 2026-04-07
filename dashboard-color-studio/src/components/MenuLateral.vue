@@ -11,7 +11,7 @@ const secciones = [
 <template>
     <div class="menuLateral">
         <header>
-            <div class="logo"><b>logo</b></div>
+            <div class="logo"><img src="../assets/images/ColorStudio_logo.png" alt="" /></div>
         </header>
         <div class="secciones">
             <router-link v-for="seccion in secciones" :to="seccion.ruta">
@@ -44,13 +44,15 @@ header {
 }
 
 .logo {
+    margin-top: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 100%;
-    width: 5rem;
-    height: 5rem;
-    border: 2px solid black;
+}
+
+.logo img {
+    width: 15rem;
+    height: auto;
 }
 
 .secciones {

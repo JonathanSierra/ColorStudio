@@ -1,10 +1,15 @@
 <script setup>
 const emits = defineEmits(['cerrar']);
 
-const props = defineProps(['ancho']);
+const props = defineProps({
+    ancho: { type: String, default: '150px' },
+    top: { type: String, default: 'auto' },
+    left: { type: String, default: 'auto' },
+    right: { type: String, default: 'auto' }
+});
 </script>
 <template>
-    <div class="modal-window" :style="{ width: ancho }">
+    <div class="modal-window" :style="{ width: ancho, top: top, left: left, right: right }">
         <ul>
             <slot name="PopOverContent"></slot>
         </ul>
@@ -16,8 +21,6 @@ const props = defineProps(['ancho']);
     justify-content: center;
     flex-direction: column;
     position: absolute;
-    top: -0.5%;
-    right: -38.5%;
     background: white;
     z-index: 10;
     width: 80px;
@@ -27,6 +30,7 @@ const props = defineProps(['ancho']);
 
 :deep(li) {
     display: flex;
+    color: black;
     border-radius: 5px;
     align-items: center;
     font-size: 14px;

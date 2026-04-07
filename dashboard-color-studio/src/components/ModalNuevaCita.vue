@@ -1,46 +1,51 @@
 <script setup>
+import { obtenerProcesos } from '../composables/procesosService';
 import BaseModal from './BaseModal.vue';
 
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
-const nombreCliente = ref();
-const fechaNacimiento = ref();
-const numeroCelular = ref();
+const procesos = ref([]);
+const procesoCita = ref();
+const fechaCita = ref();
 const textError = ref('');
 
 const emit = defineEmits(['cerrar', 'crear']);
 
+onMounted(async () => {
+    const datos = await obtenerProcesos();
+    procesos.value = datos;
+});
+
 const enviarInformacion = () => {
-    if (!nombreCliente.value || !fechaNacimiento.value || !numeroCelular.value) {
+    if (!procesoCita.value || !fechaCita.value) {
         textError.value = 'Debes completar todos los campos.';
     } else {
-        const datosNuevoCliente = {
-            nombre: nombreCliente.value,
-            fecha_cumpleaños: fechaNacimiento.value,
-            numero_celular: numeroCelular.value
+        const datosNuevaCita = {
+            proceso_id: procesoCita.value,
+            fecha_hora_cita: fechaCita.value
         };
-        emit('crear', datosNuevoCliente);
+        emit('crear', datosNuevaCita);
     }
 };
 </script>
 
 <template>
-    <BaseModal @cerrar="$emit('cerrar')">
+    <BaseModal ancho="30%" alto="40%" gap="2rem" @cerrar="$emit('cerrar')">
         <template #BaseModalHeader>
-            <h2>Crear nuevo cliente</h2>
+            <h2>Crear nueva cita</h2>
         </template>
         <template #BaseModalMain>
             <div class="campo">
-                <h3>Nombre:</h3>
-                <input v-model="nombreCliente" type="text" name="nombre" id="" />
+                <h3>Proceso:</h3>
+                <select v-model="procesoCita" name="seleccionarProceso" id="">
+                    <option v-for="proceso in procesos" :key="proceso.id" :value="proceso.id">
+                        {{ proceso.nombre }}
+                    </option>
+                </select>
             </div>
             <div class="campo">
-                <h3>Numero de celular:</h3>
-                <input v-model="numeroCelular" type="text" name="numero-celular" id="" />
-            </div>
-            <div class="campo">
-                <h3>Fecha de nacimiento:</h3>
-                <input v-model="fechaNacimiento" type="date" name="fecha-nacimiento" id="" />
+                <h3>Fecha:</h3>
+                <input v-model="fechaCita" type="date" name="fecha" id="" />
             </div>
         </template>
         <template #BaseModalFooter>
@@ -54,7 +59,6 @@ const enviarInformacion = () => {
 <style scoped>
 .campo {
     max-height: 4rem;
-    max-width: 50%;
     padding: 0 1rem;
     border-radius: 10px;
     background-color: white;
@@ -65,6 +69,14 @@ const enviarInformacion = () => {
 }
 
 .campo input {
+    background-color: rgb(228, 238, 246);
+    border: none;
+    color: black;
+    border-radius: 5px;
+    height: 1.8rem;
+}
+
+.campo select {
     background-color: rgb(228, 238, 246);
     border: none;
     color: black;

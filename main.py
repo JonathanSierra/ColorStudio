@@ -20,6 +20,22 @@ class NuevoCliente(BaseModel):
     fecha_cumpleaños: str
     numero_celular: str
 
+class NuevaCita(BaseModel):
+    proceso_id: int
+    fecha_hora_cita: str
+
+class NuevaSesion(BaseModel):
+    proceso_id: int
+    fecha_hora_sesion: str
+    valor_sesion: int
+
+class NuevoProducto(BaseModel):
+    nombre_producto: str
+    descripcion: str
+    categoria: str
+    precio: int
+    stock: int
+
 # Función de ayuda para conectar a la Base de Datos
 def get_db_connection():
     # Nos conectamos al archivo que creaste
@@ -50,15 +66,95 @@ def get_clientes():
     # los devolvemos
     return [dict(cliente) for cliente in clientes_db]
 
-# Aquí puedes agregar más adelante @app.get('/procesos') o
-# @app.get('/productos')
+@app.get("/productos")
+def get_productos():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM productos")
+        productos_db = cursor.fetchall()
+
+    return [dict(producto) for producto in productos_db]
+
+@app.get("/procesos")
+def get_procesos():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM procesos")
+        procesos_db = cursor.fetchall()
+
+    return [dict(proceso) for proceso in procesos_db]
+
+@app.get("/historial/{cliente_id}")
+def get_sesiones(cliente_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""SELECT s.*, p.nombre as nombre_proceso FROM sesiones s
+        JOIN procesos p ON s.proceso_id = p.id WHERE s.cliente_id = ?
+        ORDER BY s.fecha_hora_sesion DESC""", (cliente_id,))
+        historial = cursor.fetchall()
+
+    return [dict(h) for h in historial]
+
+@app.get("/citas/{cliente_id}")
+def get_citas(cliente_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""SELECT c.*, p.nombre as nombre_proceso, p.precio as valor_proceso FROM citas c JOIN procesos p ON c.proceso_id = p.id WHERE c.cliente_id = ?""", (cliente_id,))
+        citas = cursor.fetchall()
+
+    return [dict(c) for c in citas]
+
+@app.post("/añadirCliente")
+def add_cliente(cliente: NuevoCliente):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""INSERT INTO clientes (nombre, fecha_cumpleaños, numero_celular) VALUES (?,?,?)""",
+                       (cliente.nombre, cliente.fecha_cumpleaños, cliente.numero_celular),)
+        conn.commit()
+        return {"mensaje": "Cliente guardado con exito!"}
+
+@app.post("/crearCita/{cliente_id}")
+def add_cita(cliente_id: int, cita: NuevaCita):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""INSERT INTO citas (cliente_id, fecha_hora_cita, proceso_id) VALUES (?,?,?)""", (cliente_id, cita.fecha_hora_cita, cita.proceso_id),)
+        conn.commit()
+        return {"mensaje": f"Cita asignada al cliente con el id: {cliente_id} con exito!"}
+
+@app.post("/crearSesion/{cliente_id}")
+def add_sesion(cliente_id: int, sesion: NuevaSesion):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""INSERT INTO sesiones (cliente_id, proceso_id, fecha_hora_sesion, valor_sesion) VALUES (?,?,?,?)""",
+                       (cliente_id, sesion.proceso_id, sesion.fecha_hora_sesion, sesion.valor_sesion),)
+        conn.commit()
+        return {"mensaje": f"Sesion asignada al historial del cliente con el id: {cliente_id} con exito!"}
+
+    # Aquí puedes agregar más adelante @apps.get('/procesos') o
+    # @app.get('/productos')
 @app.delete("/eliminarCliente/{cliente_id}")
 def delete_cliente(cliente_id: int):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM clientes WHERE id = ?", (cliente_id,))
         conn.commit()
-        return {"mensaje": "Cliente eliminado"}
+        return {"mensaje": "Cliente eliminado con exito!"}
+
+@app.delete("/eliminarCita/{cita_id}")
+def delete_cita(cita_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""DELETE FROM citas WHERE id = ?""", (cita_id,))
+        conn.commit()
+        return {"mensaje": "Cita eliminada con exito!"}
+
+@app.delete("/eliminarSesion/{sesion_id}")
+def delete_sesion(sesion_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""DELETE FROM sesiones WHERE id = ?""", (sesion_id,))
+        conn.commit()
+        return {"mensaje": "Sesion eliminada con exito!"}
 
 @app.put("/editarCliente/{cliente_id}")
 def edit_cliente(cliente_id: int, cliente: NuevoCliente):
@@ -69,6 +165,14 @@ def edit_cliente(cliente_id: int, cliente: NuevoCliente):
             (cliente.nombre, cliente.fecha_cumpleaños, cliente.numero_celular, cliente_id,),)
         conn.commit()
         return {"mensaje": "Cliente Actualizado"}
+
+@app.put("/editarCita/{cita_id}")
+def edit_cita(cita_id: int, cita: NuevaCita):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""UPDATE citas SET proceso_id=?, fecha_hora_cita=? WHERE id=?""", (cita.proceso_id, cita.fecha_hora_cita, cita_id))
+        conn.commit()
+        return {"mensaje": "Cita Actualizada"}
 
 @app.patch("/desactivarCliente/{cliente_id}")
 def deactivate_cliente(cliente_id: int):
@@ -87,21 +191,3 @@ def activate_cliente(cliente_id: int):
             "UPDATE clientes SET activo = 1 WHERE id = ?", (cliente_id,))
         conn.commit()
         return {"mensaje": "Cliente Activado"}
-
-@app.post("/añadirCliente")
-def add_cliente(cliente: NuevoCliente):
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""INSERT INTO clientes (nombre, fecha_cumpleaños, numero_celular)VALUES (?,?,?)""",
-                       (cliente.nombre, cliente.fecha_cumpleaños, cliente.numero_celular),)
-        conn.commit()
-        return {"mensaje": "Cliente guardado con exito!"}
-
-@app.get("/procesos")
-def get_procesos():
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM procesos")
-        procesos_db = cursor.fetchall()
-
-    return [dict(proceso) for proceso in procesos_db]

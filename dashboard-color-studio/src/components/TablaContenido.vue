@@ -1,7 +1,14 @@
 <script setup>
 import { computed } from 'vue';
 
+const emits = defineEmits(['fila-click']);
+
 const props = defineProps({
+    minHeight: {
+        type: String,
+        default: 'auto'
+    },
+    claseFila: Function,
     datos: Array,
     columnas: Array
 });
@@ -11,8 +18,8 @@ const columnasVisibles = computed(() => {
 });
 </script>
 <template>
-    <div class="contenedor-table">
-        <table>
+    <div class="contenedor-table" :style="{ minHeight: props.minHeight }">
+        <table :class="{ 'tabla-vacia': datos.length === 0 }">
             <thead>
                 <tr>
                     <th v-for="columna in columnasVisibles" :key="columna.campo">
@@ -21,7 +28,10 @@ const columnasVisibles = computed(() => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="fila in datos" :key="fila.id">
+                <tr v-if="datos.length === 0" class="fila-tabla-vacia">
+                    <td :colspan="columnasVisibles.length" class="mensaje-tabla-vacia">No hay datos para mostrar</td>
+                </tr>
+                <tr @click="$emit('fila-click', fila)" v-for="fila in datos" :class="claseFila ? claseFila(fila) : ''" :key="fila.id">
                     <td v-for="columna in columnasVisibles" :key="columna.campo">
                         <slot :name="columna.campo" :fila="fila">
                             {{ fila[columna.campo] }}
@@ -36,7 +46,7 @@ const columnasVisibles = computed(() => {
 <style scoped>
 .contenedor-table {
     width: 100%;
-    height: 100%;
+    height: auto;
 }
 
 table {
@@ -48,6 +58,11 @@ table {
     table-layout: fixed;
     empty-cells: show;
 }
+
+.tabla-vacia {
+    height: 100%;
+}
+
 table tr {
     height: 3rem;
     max-height: 3rem;
@@ -60,6 +75,13 @@ table td {
 table th {
     font-size: 17px;
     border-bottom: 2px solid rgb(228, 238, 246);
+}
+
+.mensaje-tabla-vacia {
+    background-color: white !important;
+    color: rgb(143, 143, 143);
+    vertical-align: middle;
+    text-align: center;
 }
 
 table th,

@@ -37,5 +37,7 @@
 
 
 
-  "prettier.configPath": ".prettierrc"
+  "prettier.configPath": ".prettierrc",
+  "viraTheme.contrastedTabs": false,
+  "viraTheme.hidesExplorerArrows": true
 }
