@@ -30,8 +30,8 @@ class NuevaSesion(BaseModel):
     valor_sesion: int
 
 class NuevoProducto(BaseModel):
-    nombre_producto: str
-    descripcion: str
+    nombre: str
+    descripcion: str = "Sin Descripcion"
     categoria: str
     precio: int
     stock: int
@@ -108,10 +108,19 @@ def get_citas(cliente_id: int):
 def add_cliente(cliente: NuevoCliente):
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("""INSERT INTO clientes (nombre, fecha_cumpleaños, numero_celular) VALUES (?,?,?)""",
+        cursor.execute("""INSERT INTO clientes (nombre_producto, fecha_cumpleaños, numero_celular) VALUES (?,?,?)""",
                        (cliente.nombre, cliente.fecha_cumpleaños, cliente.numero_celular),)
         conn.commit()
         return {"mensaje": "Cliente guardado con exito!"}
+
+@app.post("/añadirProducto")
+def add_producto(producto: NuevoProducto):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""INSERT INTO productos (nombre, descripcion, categoria, precio, stock) VALUES (?,?,?,?,?)""",
+                       (producto.nombre, producto.descripcion, producto.categoria, producto.precio, producto.stock),)
+        conn.commit()
+        return {"mensaje": "Producto guardado con exito!"}
 
 @app.post("/crearCita/{cliente_id}")
 def add_cita(cliente_id: int, cita: NuevaCita):
@@ -140,6 +149,14 @@ def delete_cliente(cliente_id: int):
         conn.commit()
         return {"mensaje": "Cliente eliminado con exito!"}
 
+@app.delete("/eliminarProducto/{producto_id}")
+def delete_producto(producto_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM productos WHERE id = ?", (producto_id,))
+        conn.commit()
+        return {"mensaje": "Producto eliminado con exito!"}
+
 @app.delete("/eliminarCita/{cita_id}")
 def delete_cita(cita_id: int):
     with get_db_connection() as conn:
@@ -166,6 +183,16 @@ def edit_cliente(cliente_id: int, cliente: NuevoCliente):
         conn.commit()
         return {"mensaje": "Cliente Actualizado"}
 
+@app.put("/editarProducto/{producto_id}")
+def edit_producto(producto_id: int, producto: NuevoProducto):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE productos SET nombre=?, descripcion=?, categoria=?, precio=?, stock=? WHERE id=?",
+            (producto.nombre, producto.descripcion, producto.categoria, producto.precio, producto.stock, producto_id,),)
+        conn.commit()
+        return {"mensaje": "Producto Actualizado"}
+
 @app.put("/editarCita/{cita_id}")
 def edit_cita(cita_id: int, cita: NuevaCita):
     with get_db_connection() as conn:
@@ -173,6 +200,24 @@ def edit_cita(cita_id: int, cita: NuevaCita):
         cursor.execute("""UPDATE citas SET proceso_id=?, fecha_hora_cita=? WHERE id=?""", (cita.proceso_id, cita.fecha_hora_cita, cita_id))
         conn.commit()
         return {"mensaje": "Cita Actualizada"}
+
+@app.patch("/activarCliente/{cliente_id}")
+def activate_cliente(cliente_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE clientes SET activo = 1 WHERE id = ?", (cliente_id,))
+        conn.commit()
+        return {"mensaje": "Cliente Activado"}
+
+@app.patch("/activarProducto/{producto_id}")
+def activate_producto(producto_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE productos SET activo = 1 WHERE id = ?", (producto_id,))
+        conn.commit()
+        return {"mensaje": "Producto Activado"}
 
 @app.patch("/desactivarCliente/{cliente_id}")
 def deactivate_cliente(cliente_id: int):
@@ -183,11 +228,11 @@ def deactivate_cliente(cliente_id: int):
         conn.commit()
         return {"mensaje": "Cliente Desactivado"}
 
-@app.patch("/activarCliente/{cliente_id}")
-def activate_cliente(cliente_id: int):
+@app.patch("/desactivarProducto/{producto_id}")
+def deactivate_producto(producto_id: int):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE clientes SET activo = 1 WHERE id = ?", (cliente_id,))
+            "UPDATE productos SET activo = 0 WHERE id = ?", (producto_id,))
         conn.commit()
-        return {"mensaje": "Cliente Activado"}
+        return {"mensaje": "Producto Desactivado"}

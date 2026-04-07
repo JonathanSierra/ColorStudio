@@ -27,8 +27,8 @@ const citaAEditar = ref(null);
 const mostrarModalEditarCita = ref(false);
 const filaAbierta = ref(null);
 
-const { paginaActual: paginaActualHistorial, itemsPorPagina: itemsPorPaginaHistorial, totalPaginas: totalPaginasHistorial, paginasVisibles: paginasVisiblesHistorial, clientesPaginados: historialPaginado, textoPaginacion: textoPaginacionHistorial, primeraPagina: primeraPaginaHistorial, paginaAnterior: paginaAnteriorHistorial, paginaSiguiente: paginaSiguienteHistorial, ultimaPagina: ultimaPaginaHistorial } = usePaginacion(historial, 5, 'en historial');
-const { paginaActual: paginaActualCitas, itemsPorPagina: itemsPorPaginaCitas, totalPaginas: totalPaginasCitas, paginasVisibles: paginasVisiblesCitas, clientesPaginados: citasPaginadas, textoPaginacion: textoPaginacionCitas, primeraPagina: primeraPaginaCitas, paginaAnterior: paginaAnteriorCitas, paginaSiguiente: paginaSiguienteCitas, ultimaPagina: ultimaPaginaCitas } = usePaginacion(citas, 5, 'citas');
+const { paginaActual: paginaActualHistorial, itemsPorPagina: itemsPorPaginaHistorial, totalPaginas: totalPaginasHistorial, paginasVisibles: paginasVisiblesHistorial, itemsPaginados: historialPaginado, textoPaginacion: textoPaginacionHistorial, primeraPagina: primeraPaginaHistorial, paginaAnterior: paginaAnteriorHistorial, paginaSiguiente: paginaSiguienteHistorial, ultimaPagina: ultimaPaginaHistorial } = usePaginacion(historial, 5, 'en historial');
+const { paginaActual: paginaActualCitas, itemsPorPagina: itemsPorPaginaCitas, totalPaginas: totalPaginasCitas, paginasVisibles: paginasVisiblesCitas, itemsPaginados: citasPaginadas, textoPaginacion: textoPaginacionCitas, primeraPagina: primeraPaginaCitas, paginaAnterior: paginaAnteriorCitas, paginaSiguiente: paginaSiguienteCitas, ultimaPagina: ultimaPaginaCitas } = usePaginacion(citas, 5, 'citas');
 
 const alternarMenuAcciones = id => {
     filaAbierta.value = filaAbierta.value === id ? null : id;

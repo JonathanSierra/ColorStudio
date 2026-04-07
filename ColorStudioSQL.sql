@@ -37,10 +37,11 @@ CREATE TABLE IF NOT EXISTS sesiones (
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     FOREIGN KEY (proceso_id) REFERENCES procesos(id)
 );
-INSERT INTO productos (nombre, descripcion, stock, precio, categoria) 
-VALUES ('Shampoo de Argán', 'Nutrición profunda para cabellos secos - 500ml', 15, 45000, 'Capilar');
-INSERT INTO productos (nombre, descripcion, stock, precio, categoria) 
-VALUES ('Tinte Rubio Platino', 'Tinte profesional sin amoniaco', 24, 18000, 'Coloración');
-INSERT INTO productos (nombre, descripcion, stock, precio, categoria) 
-VALUES ('Cepillo Térmico', 'Cepillo para blower de alta resistencia', 8, 32000, 'Accesorios');
+ALTER TABLE clientes DROP COLUMN activo;
+-- INSERT INTO productos (nombre, descripcion, stock, precio, categoria) 
+-- VALUES ('Shampoo de Argán', 'Nutrición profunda para cabellos secos - 500ml', 15, 45000, 'Capilar');
+-- INSERT INTO productos (nombre, descripcion, stock, precio, categoria) 
+-- VALUES ('Tinte Rubio Platino', 'Tinte profesional sin amoniaco', 24, 18000, 'Coloración');
+-- INSERT INTO productos (nombre, descripcion, stock, precio, categoria) 
+-- VALUES ('Cepillo Térmico', 'Cepillo para blower de alta resistencia', 8, 32000, 'Accesorios');
 /* python -c "import sqlite3; con = sqlite3.connect('color_studio.db'); con.executescript(open('ColorStudioSQL.sql', encoding='utf-8').read()); con.close(); print('¡Base de datos creada con éxito!')" */

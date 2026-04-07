@@ -8,7 +8,7 @@ export function usePaginacion(fuenteDeDatos, itemsPorPaginaInicial = 5, nombreDe
         return Math.ceil(fuenteDeDatos.value.length / itemsPorPagina.value);
     });
 
-    const clientesPaginados = computed(() => {
+    const itemsPaginados = computed(() => {
         const inicio = (paginaActual.value - 1) * itemsPorPagina.value;
         const fin = inicio + itemsPorPagina.value;
 
@@ -92,7 +92,7 @@ export function usePaginacion(fuenteDeDatos, itemsPorPaginaInicial = 5, nombreDe
         itemsPorPagina,
         totalPaginas,
         paginasVisibles,
-        clientesPaginados,
+        itemsPaginados,
         textoPaginacion,
         primeraPagina,
         paginaAnterior,

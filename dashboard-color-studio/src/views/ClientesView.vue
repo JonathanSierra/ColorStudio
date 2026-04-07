@@ -82,7 +82,7 @@ const clientesFiltrados = computed(() => {
     return filtrados;
 });
 
-const { paginaActual, itemsPorPagina, totalPaginas, paginasVisibles, clientesPaginados, textoPaginacion, primeraPagina, paginaAnterior, paginaSiguiente, ultimaPagina } = usePaginacion(clientesFiltrados, 1, 'Clientes', true);
+const { paginaActual, itemsPorPagina, totalPaginas, paginasVisibles, itemsPaginados: clientesPaginados, textoPaginacion, primeraPagina, paginaAnterior, paginaSiguiente, ultimaPagina } = usePaginacion(clientesFiltrados, 1, 'Clientes', true);
 
 const alternarMenuAcciones = id => {
     filaAbierta.value = filaAbierta.value === id ? null : id;
@@ -183,7 +183,7 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
         <template v-slot:header-content>
             <h2>Clientes vista previa</h2>
             <div class="card-header-box">
-                <input v-model="terminoBusqueda" class="buscar-cliente" type="text" name="buscar-cliente" id="" placeholder="Buscar cliente" />
+                <input v-model="terminoBusqueda" class="buscar-cliente" type="text" name="buscar-cliente" id="" placeholder="Buscar Cliente" />
                 <div class="buttons-box">
                     <button v-on:click="mostrarModalNuevoCliente = true" class="añadir-cliente">
                         <span>Añadir Cliente</span>
@@ -203,7 +203,7 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
                 {{ formatearFecha(fila.fecha_registro) }}
             </template>
             <template #acciones="{ fila }">
-                <Acciones :cliente="fila" :fila-abierta="filaAbierta" @editar="abrirModalEditarCliente" @alternar="alternarMenuAcciones" @activar="handleActivarCliente" @desactivar="handleDesactivarCliente" @eliminar="handleEliminarCliente"></Acciones>
+                <Acciones tipo="Cliente" :item="fila" :fila-abierta="filaAbierta" @editar="abrirModalEditarCliente" @alternar="alternarMenuAcciones" @activar="handleActivarCliente" @desactivar="handleDesactivarCliente" @eliminar="handleEliminarCliente"></Acciones>
             </template>
         </tabla-contenido>
         <template v-slot:footer-content>
