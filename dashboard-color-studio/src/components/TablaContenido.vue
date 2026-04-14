@@ -47,10 +47,11 @@ const columnasVisibles = computed(() => {
 .contenedor-table {
     width: 100%;
     height: auto;
+    background-color: var(--bg-card-color);
 }
 
 table {
-    color: black;
+    color: var(--text-primary-color);
     width: 100%;
     align-self: center;
     border-collapse: separate;
@@ -70,23 +71,24 @@ table tr {
 
 table td {
     font-size: 15px;
+    color: var(--text-primary-color);
 }
 
 table th {
     font-size: 17px;
-    border-bottom: 2px solid rgb(228, 238, 246);
+    border-bottom: 2px solid var(--bg-color);
 }
 
 .mensaje-tabla-vacia {
-    background-color: white !important;
-    color: rgb(143, 143, 143);
+    background-color: var(--bg-card-color) !important;
+    color: var(--text-secondary-color);
     vertical-align: middle;
     text-align: center;
 }
 
 table th,
 td {
-    background-color: white;
+    background-color: var(--table-primary-color);
     text-align: center;
 }
 
@@ -95,9 +97,9 @@ table thead {
 }
 
 tbody tr:nth-child(odd) td {
-    background-color: rgb(228, 239, 255);
+    background-color: var(--table-secondary-color);
 }
 tbody tr:nth-child(even) td {
-    background-color: rgb(243, 248, 255);
+    background-color: var(--table-primary-color);
 }
 </style>

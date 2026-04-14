@@ -14,12 +14,12 @@
     background-attachment: fixed;
     display: flex;
     width: 100dvw;
-    background-color: rgb(149, 92, 202);
+    background-color: rgb(255, 255, 255);
     min-height: 100dvh;
 }
 
 .contenedor-glassmorphism {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--bg-glass);
     display: flex;
     align-items: center;
     justify-content: center;

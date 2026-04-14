@@ -1,22 +1,21 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import BaseModal from './BaseModal.vue';
 import { eliminarSesion, obtenerHistorialDeCliente } from '../composables/historialService';
 import { crearCita, editarCita, eliminarCita, obtenerCitasDeCliente } from '../composables/citasService';
 import { mostrarNotificacion, mensajeToast, tipoNotificacion } from '../composables/globalService';
 import Paginacion from './Paginacion.vue';
-import AccionesCitas from './AccionesCitas.vue';
+import Acciones from './Acciones.vue';
 import { crearSesion } from '../composables/historialService';
 import TablaContenido from './TablaContenido.vue';
 import Card from './Card.vue';
 import { formatearDinero } from '../utils/formatters';
 import { formatearFecha } from '../utils/formatters';
-import ModalNuevaCita from './ModalNuevaCita.vue';
 import { usePaginacion } from '../composables/paginacion';
-import ModalEditarCita from './ModalEditarCita.vue';
-import AccionesHistorial from './AccionesHistorial.vue';
+import FormularioNuevoObjeto from '../components/FormularioNuevoObjeto.vue';
+import { obtenerProcesos } from '../composables/procesosService';
 
-const props = defineProps(['cliente']);
+const props = defineProps(['item', 'tipo', 'alto']);
 
 const emits = defineEmits(['cerrar']);
 
@@ -26,9 +25,16 @@ const mostrarModalNuevaCita = ref(false);
 const citaAEditar = ref(null);
 const mostrarModalEditarCita = ref(false);
 const filaAbierta = ref(null);
+const procesos = ref([]);
 
 const { paginaActual: paginaActualHistorial, itemsPorPagina: itemsPorPaginaHistorial, totalPaginas: totalPaginasHistorial, paginasVisibles: paginasVisiblesHistorial, itemsPaginados: historialPaginado, textoPaginacion: textoPaginacionHistorial, primeraPagina: primeraPaginaHistorial, paginaAnterior: paginaAnteriorHistorial, paginaSiguiente: paginaSiguienteHistorial, ultimaPagina: ultimaPaginaHistorial } = usePaginacion(historial, 5, 'en historial');
 const { paginaActual: paginaActualCitas, itemsPorPagina: itemsPorPaginaCitas, totalPaginas: totalPaginasCitas, paginasVisibles: paginasVisiblesCitas, itemsPaginados: citasPaginadas, textoPaginacion: textoPaginacionCitas, primeraPagina: primeraPaginaCitas, paginaAnterior: paginaAnteriorCitas, paginaSiguiente: paginaSiguienteCitas, ultimaPagina: ultimaPaginaCitas } = usePaginacion(citas, 5, 'citas');
+
+onMounted(async () => {
+    if (props.tipo === 'Cliente') {
+        procesos.value = await obtenerProcesos();
+    }
+});
 
 const alternarMenuAcciones = id => {
     filaAbierta.value = filaAbierta.value === id ? null : id;
@@ -51,12 +57,21 @@ const columnasCitas = [
     { titulo: 'Acciones', campo: 'acciones' }
 ];
 
+const camposCita = computed(() => [
+    { titulo: 'Proceso:', nombre: 'proceso_id', type: 'select', requerido: true, opciones: procesos.value },
+    { titulo: 'Fecha:', nombre: 'fecha_hora_cita', type: 'datetime-local', requerido: true }
+]);
+
 onMounted(async () => {
-    cargarCitas();
+    if (props.tipo === 'Cliente') {
+        cargarCitas();
+    }
 });
 
 onMounted(async () => {
-    cargarHistorial();
+    if (props.tipo === 'Cliente') {
+        cargarHistorial();
+    }
 });
 
 const cerrarTodo = () => {
@@ -65,17 +80,17 @@ const cerrarTodo = () => {
     filaAbierta.value = null;
 };
 
-const cargarCitas = async cliente => {
-    const datos = await obtenerCitasDeCliente(props.cliente.id);
+const cargarCitas = async () => {
+    const datos = await obtenerCitasDeCliente(props.item.id);
     citas.value = datos;
 };
 
-const cargarHistorial = async cliente => {
-    const datos = await obtenerHistorialDeCliente(props.cliente.id);
+const cargarHistorial = async () => {
+    const datos = await obtenerHistorialDeCliente(props.item.id);
     historial.value = datos;
 };
 
-const handleConfirmarCita = async (datosNuevaSesion, cliente) => {
+const handleConfirmarCita = async datosNuevaSesion => {
     const sesionMapeada = {
         proceso_id: datosNuevaSesion.proceso_id,
         fecha_hora_sesion: datosNuevaSesion.fecha_hora_cita,
@@ -83,7 +98,7 @@ const handleConfirmarCita = async (datosNuevaSesion, cliente) => {
         cita_id: datosNuevaSesion.id
     };
 
-    await crearSesion(sesionMapeada, props.cliente.id);
+    await crearSesion(sesionMapeada, props.item.id);
     cerrarTodo();
     mostrarNotificacion('Cita confirmada con exito!');
     await eliminarCita(sesionMapeada.cita_id);
@@ -119,8 +134,8 @@ const handleEditarCita = async datosCitaActualizada => {
     cargarCitas();
 };
 
-const handleCrearCita = async (datosNuevaCita, cliente) => {
-    await crearCita(datosNuevaCita, props.cliente.id);
+const handleCrearCita = async datosNuevaCita => {
+    await crearCita(datosNuevaCita, props.item.id);
     mostrarModalNuevaCita.value = false;
     mostrarNotificacion('Cita creada con exito!');
     await cargarCitas();
@@ -128,30 +143,49 @@ const handleCrearCita = async (datosNuevaCita, cliente) => {
 </script>
 <template>
     <Teleport to="body">
-        <ModalEditarCita v-if="mostrarModalEditarCita" :cita="citaAEditar" @cerrar="mostrarModalEditarCita = false" @actualizar="handleEditarCita"></ModalEditarCita>
-        <ModalNuevaCita v-if="mostrarModalNuevaCita" @cerrar="mostrarModalNuevaCita = false" @crear="handleCrearCita"></ModalNuevaCita>
+        <FormularioNuevoObjeto v-if="mostrarModalEditarCita" ancho="32%" alto="40%" titulo="Editar Cita" :campos="camposCita" :objetoAEditar="citaAEditar" @enviar="handleEditarCita" @cerrar="mostrarModalEditarCita = false" @actualizar="handleEditarCita"></FormularioNuevoObjeto>
+        <FormularioNuevoObjeto v-if="mostrarModalNuevaCita" ancho="32%" alto="40%" titulo="Añadir Cita" :campos="camposCita" @enviar="handleCrearCita" @cerrar="mostrarModalNuevaCita = false"></FormularioNuevoObjeto>
     </Teleport>
-    <BaseModal overflow="visible" ancho="60%" alto="70%" gap="1rem" @cerrar="$emit('cerrar')">
-        <template #BaseModalHeader><h4>Ficha de Cliente</h4></template>
+    <BaseModal overflow="visible" ancho="60%" alto="alto" gap="1rem" @cerrar="$emit('cerrar')">
+        <template #BaseModalHeader
+            ><h4>Ficha de {{ tipo }}</h4></template
+        >
         <template #BaseModalMain>
             <div v-if="filaAbierta || mostrarModalNuevaCita" class="invisible-click-listener" v-on:click="cerrarTodo"></div>
-            <div class="cliente-info">
+            <div v-if="tipo === 'Cliente'" class="item-info">
                 <h3>
-                    Nombre: <span>{{ cliente.nombre }}</span>
+                    Nombre: <span>{{ props.item.nombre }}</span>
                 </h3>
                 <h3>
-                    Numero de telefono: <span>{{ cliente.numero_celular }}</span>
+                    Numero de telefono: <span>{{ props.item.numero_celular }}</span>
                 </h3>
                 <h3>
-                    Fecha de Nacimiento: <span>{{ formatearFecha(cliente.fecha_cumpleaños) }}</span>
+                    Fecha de Nacimiento: <span>{{ formatearFecha(props.item.fecha_cumpleaños) }}</span>
                 </h3>
             </div>
-            <div class="table-box">
+            <div v-if="tipo === 'Producto'" class="item-info">
+                <h3>
+                    Nombre: <span>{{ props.item.nombre }}</span>
+                </h3>
+                <h3>
+                    Categoria: <span>{{ props.item.categoria }}</span>
+                </h3>
+                <h3>
+                    Descripcion: <span>{{ props.item.descripcion }}</span>
+                </h3>
+                <h3>
+                    Precio: <span>{{ formatearDinero(props.item.precio) }}</span>
+                </h3>
+                <h3>
+                    Stock: <span>{{ props.item.stock }}</span>
+                </h3>
+            </div>
+            <div v-if="tipo === 'Cliente'" class="table-box">
                 <Card class="card-historial">
                     <template #header-content><h4>Historial</h4></template>
-                    <TablaContenido min-height="18rem" :datos="historialPaginado" :columnas="columnasHistorial" class="tabla-contenido">
+                    <TablaContenido v-if="tipo === 'Cliente'" min-height="18rem" :datos="historialPaginado" :columnas="columnasHistorial" class="tabla-contenido">
                         <template #acciones="{ fila }">
-                            <AccionesHistorial :sesion="fila" @eliminar="handleEliminarSesion"></AccionesHistorial>
+                            <Acciones tipo="Sesion" :item="fila" @eliminar="handleEliminarSesion"></Acciones>
                         </template>
                         <template #fecha_hora_sesion="{ fila }"> {{ formatearFecha(fila.fecha_hora_sesion) }}</template>
                         <template #valor_sesion="{ fila }">{{ formatearDinero(fila.valor_sesion) }}</template>
@@ -168,9 +202,9 @@ const handleCrearCita = async (datosNuevaCita, cliente) => {
                         <h4>Citas Pendientes</h4>
                         <button class="añadir-citas-button" v-on:click="mostrarModalNuevaCita = !mostrarModalNuevaCita">Añadir</button>
                     </template>
-                    <TablaContenido min-height="18rem" :datos="citasPaginadas" :columnas="columnasCitas" class="tabla-contenido">
+                    <TablaContenido v-if="tipo === 'Cliente'" min-height="18rem" :datos="citasPaginadas" :columnas="columnasCitas" class="tabla-contenido">
                         <template #acciones="{ fila }">
-                            <AccionesCitas :cita="fila" :fila-abierta="filaAbierta" @editar="abrirModalEditarCita" @alternar="alternarMenuAcciones" @confirmar="handleConfirmarCita" @cancelar="handleCancelarCita"></AccionesCitas>
+                            <Acciones tipo="Cita" :item="fila" :fila-abierta="filaAbierta" @editar="abrirModalEditarCita" @alternar="alternarMenuAcciones" @confirmar="handleConfirmarCita" @cancelar="handleCancelarCita"></Acciones>
                         </template>
                         <template #fecha_hora_cita="{ fila }"> {{ formatearFecha(fila.fecha_hora_cita) }} </template>
                     </TablaContenido>
@@ -186,16 +220,35 @@ const handleCrearCita = async (datosNuevaCita, cliente) => {
     </BaseModal>
 </template>
 <style scoped>
-* {
-    color: black;
+.item-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    padding: 1.5rem;
+    gap: 1.5rem;
 }
 
-.cliente-info {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    padding: 0 1rem;
-    justify-content: space-between;
+.item-info h3 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.item-info h3:first-child {
+    grid-column: 1 / span 2;
+    font-size: 1.4rem;
+    border-bottom: 2px solid var(--input-border-color);
+    padding-bottom: 10px;
+}
+
+.item-info h3 span {
+    font-weight: lighter;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.item-info h3:nth-child(odd):not(:first-child) {
+    text-align: right;
+    justify-self: end;
 }
 
 .table-box {
@@ -219,7 +272,6 @@ const handleCrearCita = async (datosNuevaCita, cliente) => {
 
 .card-header button {
     display: flex;
-    color: white;
     align-items: center;
     justify-content: center;
     width: 5rem;
@@ -252,12 +304,10 @@ const handleCrearCita = async (datosNuevaCita, cliente) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: white;
     width: 1rem;
     height: 1rem;
     border-radius: 100%;
     padding: 10px;
-    color: black;
 }
 
 .table-page img {

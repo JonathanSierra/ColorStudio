@@ -1,10 +1,9 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import BasePopOver from './BasePopOver.vue';
 
+const props = defineProps(['filtroEstado', 'fechaInicio', 'fechaFinal', 'item', 'tipo']);
 const emits = defineEmits(['cambiar-estado', 'filtroFechaRegistro', 'limpiar-filtros']);
-
-const props = defineProps(['filtroEstado', 'mostrarClientesInactivos', 'fechaInicio', 'fechaFinal']);
 
 onMounted(() => {
     fechaDesde.value = props.fechaInicio;
@@ -18,6 +17,23 @@ const limpiarTodo = () => {
     emits('cambiar-estado', 'sinFiltros');
 };
 
+const textoActivo = computed(() => {
+    if (props.tipo === 'Producto') {
+        return 'Disponibles';
+    }
+    if (props.tipo === 'Cliente') {
+        return 'Activos';
+    }
+});
+const textoInactivo = computed(() => {
+    if (props.tipo === 'Producto') {
+        return 'No Disponibles';
+    }
+    if (props.tipo === 'Cliente') {
+        return 'Inactivos';
+    }
+});
+
 const mostrarRango = ref(false);
 const fechaDesde = ref('');
 const fechaHasta = ref('');
@@ -27,10 +43,10 @@ const fechaHasta = ref('');
     <BasePopOver left="98.2%" ancho="100px">
         <template #PopOverContent>
             <li v-on:click="limpiarTodo" :class="{ 'filtro-activo': !props.fechaInicio && !props.fechaFinal && props.filtroEstado === 'sinFiltros' }">No filtrar</li>
-            <li v-on:click="$emit('cambiar-estado', 'activos')" :class="{ 'filtro-activo': props.filtroEstado === 'activos' }">Activos</li>
-            <li v-on:click="$emit('cambiar-estado', 'inactivos')" :class="{ 'filtro-activo': props.filtroEstado === 'inactivos' }">Inactivos</li>
-            <li v-on:click="mostrarRango = !mostrarRango" class="filtro-fecha-ingreso" :class="{ 'filtro-activo': mostrarRango || props.fechaInicio || props.fechaFinal }">Fecha de ingreso</li>
-            <BasePopOver v-if="mostrarRango" class="modal-rango-fecha-ingreso" right="0" top="100%" ancho="300px">
+            <li v-on:click="$emit('cambiar-estado', 'activos')" :class="{ 'filtro-activo': props.filtroEstado === 'activos' }">{{ textoActivo }}</li>
+            <li v-on:click="$emit('cambiar-estado', 'inactivos')" :class="{ 'filtro-activo': props.filtroEstado === 'inactivos' }">{{ textoInactivo }}</li>
+            <li v-if="tipo === 'Cliente'" v-on:click="mostrarRango = !mostrarRango" class="filtro-fecha-ingreso" :class="{ 'filtro-activo': mostrarRango || props.fechaInicio || props.fechaFinal }">Fecha de ingreso</li>
+            <BasePopOver v-if="mostrarRango" class="modal-rango-fecha-ingreso" right="-2px" top="100%" ancho="300px">
                 <template class="template" #PopOverContent>
                     <div class="desde-hasta">
                         <div class="desde">
@@ -50,10 +66,15 @@ const fechaHasta = ref('');
 </template>
 <style scoped>
 .modal-window {
-    border: 2px solid rgb(5, 148, 244);
+    border: 2px solid var(--border-color);
+    background-color: var(--bg-color);
     position: absolute;
     top: -0.5%;
     right: -46%;
+}
+
+li {
+    color: var(--text-primary-color);
 }
 
 li img {
@@ -64,7 +85,7 @@ li img {
 
 .filtro-activo {
     color: white !important;
-    background-color: rgb(5, 148, 244) !important;
+    background-color: var(--accent-hover-color) !important;
 }
 
 .filtro-fecha-ingreso {
@@ -106,8 +127,8 @@ button {
 .modal-rango-fecha-ingreso input {
     width: 70%;
     height: 1.5rem;
-    color: black;
-    background-color: rgb(228, 238, 246);
+    color: var(--text-secondary-color);
+    background-color: var(--bg-input-color);
     border-radius: 5px;
 }
 </style>

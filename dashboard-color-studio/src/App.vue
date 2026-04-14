@@ -23,7 +23,6 @@ import MenuLateral from './components/MenuLateral.vue';
 /* Un reseteo básico para que el fondo se vea bien */
 .app-container {
     min-width: 100%;
-    background-color: #f3f4f6;
     /* Un gris muy suave y moderno */
     font-family: 'Outfit', sans-serif;
 }
@@ -32,7 +31,6 @@ import MenuLateral from './components/MenuLateral.vue';
     display: flex;
     flex-direction: column;
     padding: 0;
-    color: black;
     height: 100%;
     width: 100%;
 }

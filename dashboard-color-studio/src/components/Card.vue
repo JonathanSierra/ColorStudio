@@ -15,19 +15,17 @@
 <style scoped>
 .card {
     display: flex;
-    background-color: rgb(255, 255, 255);
     padding: 0;
     flex-direction: column;
     border-radius: 15px;
-    box-shadow: 5px 5px 10px rgb(228, 238, 246);
+    box-shadow: var(--card-shadow);
 }
 
 .card-header {
     width: 100%;
     height: 3rem;
     padding: 5px 0;
-    background-color: rgb(255, 255, 255);
-    border-bottom: 2px solid rgb(228, 238, 246);
+    border-bottom: 2px solid var(--bg-color);
     border-radius: 15px 15px 0 0;
     display: flex;
     justify-content: space-between;
@@ -35,9 +33,14 @@
 }
 
 .card-footer {
-    background-color: white;
-    border-top: 2px solid rgb(228, 238, 246);
+    border-top: 2px solid var(--bg-color);
     border-radius: 0 0 10px 10px;
     padding: 5px;
+}
+
+.card,
+.card-header,
+.card-footer {
+    background-color: var(--bg-card-color);
 }
 </style>

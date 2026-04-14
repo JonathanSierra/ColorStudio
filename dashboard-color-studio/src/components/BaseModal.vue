@@ -58,9 +58,9 @@ const props = defineProps({
     overflow: v-bind(overflow);
     flex-direction: column;
     border-radius: 20px;
-    width: v-bind(ancho);
-    height: v-bind(alto);
-    background-color: rgb(228, 238, 246);
+    width: v-bind('props.ancho');
+    height: v-bind('props.alto');
+    background-color: var(--bg-color);
 }
 
 .modal-window header {
@@ -69,8 +69,8 @@ const props = defineProps({
     border-radius: 20px 20px 0 0;
     align-items: center;
     padding: 1rem;
-    background-color: white;
-    color: black;
+    background-color: var(--bg-card-color);
+    color: var(--text-primary-color);
 }
 
 .modal-window main {
@@ -87,7 +87,7 @@ const props = defineProps({
     justify-content: end;
     gap: 1rem;
     border-radius: 0 0 20px 20px;
-    background-color: white;
+    background-color: var(--bg-card-color);
     color: black;
     padding: 1rem;
 }

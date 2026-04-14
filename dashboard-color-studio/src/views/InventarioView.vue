@@ -8,6 +8,7 @@ import { mostrarNotificacion, mensajeToast, tipoNotificacion } from '../composab
 import TablaContenido from '../components/TablaContenido.vue';
 import Card from '../components/Card.vue';
 import ModalMasAcciones from '../components/ModalMasAcciones.vue';
+import ModalFicha from '../components/ModalFicha.vue';
 import ModalFiltros from '../components/ModalFiltros.vue';
 import BaseToast from '../components/BaseToast.vue';
 import Acciones from '../components/Acciones.vue';
@@ -24,11 +25,11 @@ const misColumnas = [
 ];
 
 const camposProducto = [
-    { titulo: 'Nombre:', nombre: 'nombre', type: 'text' },
-    { titulo: 'Descripcion:', nombre: 'descripcion', type: 'text' },
-    { titulo: 'Categoria:', nombre: 'categoria', type: 'text' },
-    { titulo: 'Precio:', nombre: 'precio', type: 'number' },
-    { titulo: 'Stock:', nombre: 'stock', type: 'number' }
+    { titulo: 'Nombre:', nombre: 'nombre', type: 'text', requerido: true },
+    { titulo: 'Descripcion:', nombre: 'descripcion', type: 'text', requerido: false },
+    { titulo: 'Categoria:', nombre: 'categoria', type: 'text', requerido: true },
+    { titulo: 'Precio:', nombre: 'precio', type: 'number', requerido: true },
+    { titulo: 'Stock:', nombre: 'stock', type: 'number', requerido: true }
 ];
 
 const misProductos = ref([]);
@@ -57,9 +58,9 @@ const productosFiltrados = computed(() => {
     let filtrados = misProductos.value;
 
     if (filtroEstado.value === 'activos') {
-        filtrados = filtrados.filter(c => c.activo === 1);
+        filtrados = filtrados.filter(c => c.estado === 'Disponible');
     } else if (filtroEstado.value === 'inactivos') {
-        filtrados = filtrados.filter(c => c.activo === 0);
+        filtrados = filtrados.filter(c => c.estado === 'No Disponible');
     }
     if (terminoBusqueda.value) {
         const busqueda = terminoBusqueda.value.toLowerCase().trim();
@@ -69,7 +70,7 @@ const productosFiltrados = computed(() => {
     return filtrados;
 });
 
-const { paginaActual, itemsPorPagina, totalPaginas, paginasVisibles, itemsPaginados: productosPaginados, textoPaginacion, primeraPagina, paginaAnterior, paginaSiguiente, ultimaPagina } = usePaginacion(productosFiltrados, 10, 'Productos');
+const { paginaActual, itemsPorPagina, totalPaginas, paginasVisibles, itemsPaginados: productosPaginados, textoPaginacion, primeraPagina, paginaAnterior, paginaSiguiente, ultimaPagina } = usePaginacion(productosFiltrados, 1, 'Productos', true);
 
 const alternarMenuAcciones = id => {
     filaAbierta.value = filaAbierta.value === id ? null : id;
@@ -82,7 +83,7 @@ const cerrarTodo = () => {
 
 const abrirModalEditarProducto = producto => {
     productoAEditar.value = producto;
-    mostrarModalEditarProducto.value = true;
+    mostrarModalNuevoProducto.value = true;
 };
 
 const abrirFicha = producto => {
@@ -98,6 +99,14 @@ const alternarModalFiltros = () => {
     }
 };
 
+const handleEnviar = datos => {
+    if (productoAEditar.value) {
+        handleEditarProducto(datos);
+    } else {
+        handleCrearProducto(datos);
+    }
+};
+
 const handleCrearProducto = async datosNuevoProducto => {
     await crearProducto(datosNuevoProducto);
     mostrarModalNuevoProducto.value = false;
@@ -107,7 +116,8 @@ const handleCrearProducto = async datosNuevoProducto => {
 const handleEditarProducto = async datosProductoActualizado => {
     const id = productoAEditar.value.id;
     await editarProducto(id, datosProductoActualizado);
-    mostrarModalEditarProducto.value = false;
+    mostrarModalNuevoProducto.value = false;
+    productoAEditar.value = null;
     mostrarNotificacion('Producto Actualizado con exito!');
     cargarProductos();
 };
@@ -156,7 +166,17 @@ const handleLimpiarFiltros = () => {
                 </template>
             </BaseToast>
         </Transition>
-        <FormularioNuevoObjeto v-if="mostrarModalNuevoProducto" titulo="Añadir Producto" :campos="camposProducto" @enviar="handleCrearProducto" @cerrar="mostrarModalNuevoProducto = false"></FormularioNuevoObjeto>
+        <ModalFicha v-if="mostrarFicha" tipo="Producto" :item="productoSeleccionado" alto="40%" @cerrar="mostrarFicha = false"></ModalFicha>
+        <FormularioNuevoObjeto
+            v-if="mostrarModalNuevoProducto"
+            :titulo="productoAEditar ? 'Editar Producto' : 'Añadir Producto'"
+            :objetoAEditar="productoAEditar"
+            :campos="camposProducto"
+            @enviar="handleEnviar"
+            @cerrar="
+                mostrarModalNuevoProducto = false;
+                productoAEditar = null;
+            "></FormularioNuevoObjeto>
     </Teleport>
     <h1>Inventario</h1>
     <card class="card-productos">
@@ -166,21 +186,21 @@ const handleLimpiarFiltros = () => {
                 <input v-model="terminoBusqueda" class="buscar-producto" type="text" name="buscar-producto" id="" placeholder="Buscar Producto" />
                 <div class="buttons-box">
                     <button v-on:click="mostrarModalNuevoProducto = true" class="añadir-producto">
-                        <span>Añadir producto</span>
+                        <span>Añadir Producto</span>
                     </button>
                     <button v-on:click="alternarModalFiltros" class="filtro-producto">
                         <span>Filtrar</span>
                     </button>
-                    <ModalFiltros v-if="mostrarModalFiltros" :fecha-inicio="fechaInicio" :fecha-final="fechaFinal" @limpiar-filtros="handleLimpiarFiltros" :filtro-estado="filtroEstado" @cambiar-estado="nuevo => (filtroEstado = nuevo)" @filtro-fecha-registro="handleFechaFiltro"></ModalFiltros>
+                    <ModalFiltros v-if="mostrarModalFiltros" tipo="Producto" :fecha-inicio="fechaInicio" :fecha-final="fechaFinal" @limpiar-filtros="handleLimpiarFiltros" :filtro-estado="filtroEstado" @cambiar-estado="nuevo => (filtroEstado = nuevo)" @filtro-fecha-registro="handleFechaFiltro"></ModalFiltros>
                 </div>
             </div>
         </template>
-        <tabla-contenido min-height="27rem" @fila-click="abrirFicha" class="tabla-inventario" :datos="productosPaginados" :columnas="misColumnas" :clase-fila="fila => (fila.activo === 0 ? 'producto-inactivo' : '')">
+        <tabla-contenido min-height="27rem" @fila-click="abrirFicha" class="tabla-productos" :datos="productosPaginados" :columnas="misColumnas" :clase-fila="fila => (fila.estado === 'No Disponible' ? 'producto-inactivo' : '')">
             <template #precio="{ fila }">
                 {{ formatearDinero(fila.precio) }}
             </template>
             <template #acciones="{ fila }">
-                <Acciones tipo="Producto" :item="fila" :fila-abierta="filaAbierta" @editar="abrirModalEditarProducto" @alternar="alternarMenuAcciones" @activar="handleActivarProducto" @desactivar="handleDesactivarProducto" @eliminar="handleEliminarProducto"></Acciones>
+                <Acciones tipo="Producto" :item="fila" :fila-abierta="filaAbierta" @abrir="abrirFicha" @editar="abrirModalEditarProducto" @alternar="alternarMenuAcciones" @activar="handleActivarProducto" @desactivar="handleDesactivarProducto" @eliminar="handleEliminarProducto"></Acciones>
             </template>
         </tabla-contenido>
         <template v-slot:footer-content>
@@ -211,12 +231,8 @@ h1 {
     flex-shrink: 0;
 }
 
-:deep(.tabla-productos tbody tr td) {
-    transition: all ease-in-out 80ms;
-}
-
 :deep(.tabla-productos tbody tr:hover td) {
-    background-color: rgb(217, 228, 245);
+    background-color: var(--section-hover-color);
     cursor: pointer;
 }
 
@@ -251,16 +267,13 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-left: 2px solid rgb(228, 238, 246);
+    border-left: 2px solid var(--input-border-color);
     height: 70%;
     width: 60%;
     padding: 0 1rem;
 }
 
 .buscar-producto {
-    color: black;
-    background-color: rgb(255, 255, 255);
-    border: 2px solid rgb(228, 238, 246);
     border-radius: 5px;
     width: 45%;
     height: 80%;
@@ -284,7 +297,6 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgb(5, 148, 244);
     width: 60%;
     height: 2rem;
 }
@@ -298,10 +310,7 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: white;
     height: 2rem;
-    color: rgb(5, 148, 244);
-    border: 2px solid rgb(5, 148, 244);
     width: 30%;
 }
 

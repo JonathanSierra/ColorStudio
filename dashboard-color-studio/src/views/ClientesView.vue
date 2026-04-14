@@ -5,17 +5,14 @@ import { obtenerClientes, crearCliente, editarCliente, activarCliente, desactiva
 import { mostrarNotificacion, mensajeToast, tipoNotificacion } from '../composables/globalService';
 import TablaContenido from '../components/TablaContenido.vue';
 import Card from '../components/Card.vue';
-import ModalNuevoCliente from '../components/ModalNuevoCliente.vue';
-import ModalEditarCliente from '../components/ModalEditarCliente.vue';
 import ModalMasAcciones from '../components/ModalMasAcciones.vue';
 import ModalFiltros from '../components/ModalFiltros.vue';
 import BaseToast from '../components/BaseToast.vue';
-import ModalFichaCliente from '../components/ModalFichaCliente.vue';
+import ModalFicha from '../components/ModalFicha.vue';
 import Acciones from '../components/Acciones.vue';
 import { formatearFecha } from '../utils/formatters';
 import Paginacion from '../components/Paginacion.vue';
-
-// comentario
+import FormularioNuevoObjeto from '../components/FormularioNuevoObjeto.vue';
 
 const misClientes = ref([]);
 const clienteAEditar = ref(null);
@@ -39,6 +36,12 @@ const misColumnas = [
     { titulo: 'Acciones', campo: 'acciones' }
 ];
 
+const camposCliente = [
+    { titulo: 'Nombre:', nombre: 'nombre', type: 'text', requerido: true },
+    { titulo: 'Numero de celular:', nombre: 'numero_celular', type: 'tel', requerido: true, pattern: '[0-9 +]*', maxlength: '15' },
+    { titulo: 'Fecha de Nacimiento:', nombre: 'fecha_cumpleaños', type: 'date', requerido: true }
+];
+
 onMounted(() => {
     cargarClientes();
 });
@@ -56,9 +59,9 @@ const clientesFiltrados = computed(() => {
     let filtrados = misClientes.value;
 
     if (filtroEstado.value === 'activos') {
-        filtrados = filtrados.filter(c => c.activo === 1);
+        filtrados = filtrados.filter(c => c.estado === 'Activo');
     } else if (filtroEstado.value === 'inactivos') {
-        filtrados = filtrados.filter(c => c.activo === 0);
+        filtrados = filtrados.filter(c => c.estado === 'Inactivo');
     }
     if (terminoBusqueda.value) {
         const busqueda = terminoBusqueda.value.toLowerCase().trim();
@@ -95,7 +98,7 @@ const cerrarTodo = () => {
 
 const abrirModalEditarCliente = cliente => {
     clienteAEditar.value = cliente;
-    mostrarModalEditarCliente.value = true;
+    mostrarModalNuevoCliente.value = true;
 };
 
 const abrirFicha = cliente => {
@@ -111,6 +114,14 @@ const alternarModalFiltros = () => {
     }
 };
 
+const handleEnviar = datos => {
+    if (clienteAEditar.value) {
+        handleEditarCliente(datos);
+    } else {
+        handleCrearCliente(datos);
+    }
+};
+
 const handleCrearCliente = async datosNuevoCliente => {
     await crearCliente(datosNuevoCliente);
     mostrarModalNuevoCliente.value = false;
@@ -118,9 +129,11 @@ const handleCrearCliente = async datosNuevoCliente => {
     cargarClientes();
 };
 const handleEditarCliente = async datosClienteActualizado => {
+    console.log('¡He recibido los datos para editar!', datosClienteActualizado);
     const id = clienteAEditar.value.id;
     await editarCliente(id, datosClienteActualizado);
-    mostrarModalEditarCliente.value = false;
+    mostrarModalNuevoCliente.value = false;
+    clienteAEditar.value = null;
     mostrarNotificacion('Cliente Actualizado con exito!');
     cargarClientes();
 };
@@ -174,9 +187,17 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
                 </template>
             </BaseToast>
         </Transition>
-        <ModalFichaCliente v-if="mostrarFicha" :cliente="clienteSeleccionado" @cerrar="mostrarFicha = false"></ModalFichaCliente>
-        <ModalEditarCliente v-if="mostrarModalEditarCliente" :cliente="clienteAEditar" @cerrar="mostrarModalEditarCliente = false" @actualizar="handleEditarCliente"></ModalEditarCliente>
-        <ModalNuevoCliente v-if="mostrarModalNuevoCliente" @cerrar="mostrarModalNuevoCliente = false" @crear="handleCrearCliente"></ModalNuevoCliente>
+        <ModalFicha v-if="mostrarFicha" tipo="Cliente" :item="clienteSeleccionado" alto="70%" @cerrar="mostrarFicha = false"></ModalFicha>
+        <FormularioNuevoObjeto
+            v-if="mostrarModalNuevoCliente"
+            :titulo="clienteAEditar ? 'Editar Cliente' : 'Añadir Cliente'"
+            :objetoAEditar="clienteAEditar"
+            :campos="camposCliente"
+            @enviar="handleEnviar"
+            @cerrar="
+                mostrarModalNuevoCliente = false;
+                clienteAEditar = null;
+            "></FormularioNuevoObjeto>
     </Teleport>
     <h1>Clientes</h1>
     <card class="card-clientes">
@@ -191,11 +212,11 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
                     <button v-on:click="alternarModalFiltros" class="filtro-cliente">
                         <span>Filtrar</span>
                     </button>
-                    <ModalFiltros v-if="mostrarModalFiltros" :fecha-inicio="fechaInicio" :fecha-final="fechaFinal" @limpiar-filtros="handleLimpiarFiltros" :filtro-estado="filtroEstado" @cambiar-estado="nuevo => (filtroEstado = nuevo)" @filtro-fecha-registro="handleFechaFiltro"></ModalFiltros>
+                    <ModalFiltros v-if="mostrarModalFiltros" tipo="Cliente" :fecha-inicio="fechaInicio" :fecha-final="fechaFinal" @limpiar-filtros="handleLimpiarFiltros" :filtro-estado="filtroEstado" @cambiar-estado="nuevo => (filtroEstado = nuevo)" @filtro-fecha-registro="handleFechaFiltro"></ModalFiltros>
                 </div>
             </div>
         </template>
-        <tabla-contenido min-height="27rem" @fila-click="abrirFicha" class="tabla-clientes" :datos="clientesPaginados" :columnas="misColumnas" :clase-fila="fila => (fila.activo === 0 ? 'cliente-inactivo' : '')">
+        <tabla-contenido min-height="27rem" @fila-click="abrirFicha" class="tabla-clientes" :datos="clientesPaginados" :columnas="misColumnas" :clase-fila="fila => (fila.estado === 'Inactivo' ? 'cliente-inactivo' : '')">
             <template #fecha_cumpleaños="{ fila }">
                 {{ formatearFecha(fila.fecha_cumpleaños) }}
             </template>
@@ -203,7 +224,7 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
                 {{ formatearFecha(fila.fecha_registro) }}
             </template>
             <template #acciones="{ fila }">
-                <Acciones tipo="Cliente" :item="fila" :fila-abierta="filaAbierta" @editar="abrirModalEditarCliente" @alternar="alternarMenuAcciones" @activar="handleActivarCliente" @desactivar="handleDesactivarCliente" @eliminar="handleEliminarCliente"></Acciones>
+                <Acciones tipo="Cliente" :item="fila" :fila-abierta="filaAbierta" @abrir="abrirFicha" @editar="abrirModalEditarCliente" @alternar="alternarMenuAcciones" @activar="handleActivarCliente" @desactivar="handleDesactivarCliente" @eliminar="handleEliminarCliente"></Acciones>
             </template>
         </tabla-contenido>
         <template v-slot:footer-content>
@@ -229,12 +250,8 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
     flex-shrink: 0;
 }
 
-:deep(.tabla-clientes tbody tr td) {
-    transition: all ease-in-out 80ms;
-}
-
 :deep(.tabla-clientes tbody tr:hover td) {
-    background-color: rgb(217, 228, 245);
+    background-color: var(--section-hover-color);
     cursor: pointer;
 }
 
@@ -269,16 +286,13 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-left: 2px solid rgb(228, 238, 246);
+    border-left: 2px solid var(--input-border-color);
     height: 70%;
     width: 60%;
     padding: 0 1rem;
 }
 
 .buscar-cliente {
-    color: black;
-    background-color: rgb(255, 255, 255);
-    border: 2px solid rgb(228, 238, 246);
     border-radius: 5px;
     width: 45%;
     height: 80%;
@@ -302,7 +316,6 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgb(5, 148, 244);
     width: 60%;
     height: 2rem;
 }
@@ -316,10 +329,7 @@ watch(terminoBusqueda, () => (paginaActual.value = 1));
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: white;
     height: 2rem;
-    color: rgb(5, 148, 244);
-    border: 2px solid rgb(5, 148, 244);
     width: 30%;
 }
 

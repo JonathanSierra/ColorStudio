@@ -9,7 +9,7 @@ const secciones = [
 </script>
 
 <template>
-    <div class="menuLateral">
+    <div class="menu-lateral">
         <header>
             <div class="logo"><img src="../assets/images/ColorStudio_logo.png" alt="" /></div>
         </header>
@@ -22,14 +22,14 @@ const secciones = [
     </div>
 </template>
 <style scoped>
-.menuLateral {
+.menu-lateral {
     display: flex;
     flex-direction: column;
     z-index: 1;
     width: 20%;
     height: 100%;
     border-radius: 35px 0 0 35px;
-    background-color: rgb(163, 206, 241);
+    background-color: var(--lateral-menu-color);
 }
 
 header {
@@ -51,6 +51,7 @@ header {
 }
 
 .logo img {
+    filter: var(--logo-filter);
     width: 15rem;
     height: auto;
 }
@@ -70,21 +71,22 @@ header {
     padding-left: 10px;
     border-radius: 10px;
     gap: 5px;
-    color: black;
+    color: var(--text-primary-color);
     font-size: 22px;
 }
 
 .seccion:hover {
-    background-color: rgb(196, 217, 235);
+    background-color: var(--section-hover-color);
     cursor: pointer;
 }
 
 .seccion-icon {
     width: 20px;
+    filter: var(--icon-filter);
     height: 20px;
 }
 
 .router-link-active .seccion {
-    background-color: rgb(196, 217, 235);
+    background-color: var(--section-hover-color);
 }
 </style>

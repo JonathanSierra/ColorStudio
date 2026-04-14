@@ -21,7 +21,7 @@ const props = defineProps({
     justify-content: center;
     flex-direction: column;
     position: absolute;
-    background: white;
+    background: var(--bg-color);
     z-index: 10;
     width: 80px;
     padding: 5px;
@@ -30,7 +30,7 @@ const props = defineProps({
 
 :deep(li) {
     display: flex;
-    color: black;
+    color: var(--text-primary-color);
     border-radius: 5px;
     align-items: center;
     font-size: 14px;
@@ -46,9 +46,5 @@ ul {
     display: flex;
     margin: 0;
     padding: 0;
-}
-
-:deep(li:hover) {
-    background-color: rgb(208, 208, 208);
 }
 </style>

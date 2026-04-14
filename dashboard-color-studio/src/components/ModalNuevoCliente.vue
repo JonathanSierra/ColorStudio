@@ -57,7 +57,7 @@ const enviarInformacion = () => {
     max-width: 50%;
     padding: 0 1rem;
     border-radius: 10px;
-    background-color: white;
+    background-color: var(--bg-card-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -65,22 +65,13 @@ const enviarInformacion = () => {
 }
 
 .campo input {
-    background-color: rgb(228, 238, 246);
     border: none;
-    color: black;
     border-radius: 5px;
     height: 1.8rem;
 }
 
-.btn-cancelar {
-    background-color: white;
-    border: 2px solid black;
-    color: black;
-}
-
 h3,
 h2 {
-    color: black;
     padding: 0;
     margin: 0;
 }
