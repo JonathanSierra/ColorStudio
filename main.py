@@ -95,6 +95,15 @@ def get_sesiones(cliente_id: int):
 
     return [dict(h) for h in historial]
 
+@app.get("/citas")
+def get_all_citas():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""SELECT ci.*, p.nombre as nombre_proceso, cl.nombre as nombre_cliente FROM citas ci JOIN procesos p ON ci.proceso_id = p.id JOIN clientes cl ON ci.cliente_id = cl.id""")
+        citas = cursor.fetchall()
+
+        return [dict(c) for c in citas]
+
 @app.get("/citas/{cliente_id}")
 def get_citas(cliente_id: int):
     with get_db_connection() as conn:
@@ -104,11 +113,12 @@ def get_citas(cliente_id: int):
 
     return [dict(c) for c in citas]
 
+
 @app.post("/añadirCliente")
 def add_cliente(cliente: NuevoCliente):
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("""INSERT INTO clientes (nombre_producto, fecha_cumpleaños, numero_celular) VALUES (?,?,?)""",
+        cursor.execute("""INSERT INTO clientes (nombre, fecha_cumpleaños, numero_celular) VALUES (?,?,?)""",
                        (cliente.nombre, cliente.fecha_cumpleaños, cliente.numero_celular),)
         conn.commit()
         return {"mensaje": "Cliente guardado con exito!"}
@@ -206,7 +216,7 @@ def activate_cliente(cliente_id: int):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE clientes SET activo = 1 WHERE id = ?", (cliente_id,))
+            "UPDATE clientes SET estado = 'Activo' WHERE id = ?", (cliente_id,))
         conn.commit()
         return {"mensaje": "Cliente Activado"}
 
@@ -215,7 +225,7 @@ def activate_producto(producto_id: int):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE productos SET activo = 1 WHERE id = ?", (producto_id,))
+            "UPDATE productos SET estado = 'Disponible' WHERE id = ?", (producto_id,))
         conn.commit()
         return {"mensaje": "Producto Activado"}
 
@@ -224,7 +234,7 @@ def deactivate_cliente(cliente_id: int):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE clientes SET activo = 0 WHERE id = ?", (cliente_id,))
+            "UPDATE clientes SET estado = 'Inactivo' WHERE id = ?", (cliente_id,))
         conn.commit()
         return {"mensaje": "Cliente Desactivado"}
 
@@ -233,6 +243,6 @@ def deactivate_producto(producto_id: int):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE productos SET activo = 0 WHERE id = ?", (producto_id,))
+            "UPDATE productos SET estado = 'No Disponible' WHERE id = ?", (producto_id,))
         conn.commit()
         return {"mensaje": "Producto Desactivado"}

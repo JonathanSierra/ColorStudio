@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS sesiones (
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     FOREIGN KEY (proceso_id) REFERENCES procesos(id)
 );
-ALTER TABLE clientes DROP COLUMN activo;
 -- INSERT INTO productos (nombre, descripcion, stock, precio, categoria) 
 -- VALUES ('Shampoo de Argán', 'Nutrición profunda para cabellos secos - 500ml', 15, 45000, 'Capilar');
 -- INSERT INTO productos (nombre, descripcion, stock, precio, categoria) 
